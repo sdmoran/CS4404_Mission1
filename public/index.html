@@ -4,12 +4,59 @@
         <title>ShueWorld Ballot</title>
     </head>
     <body>
-        <form>
-            <label for="idInput">Unique ShueWorld Citizen ID: </label>
-            <input type="text" id="idInput">
-            <select>
-                <option></option>
-            </select>
+        <h1>ShueWorld Ballot</h1>
+        <form id="voteForm" onsubmit="sendVote(event)">
+            <div class="row">
+                <label for="idInput">Unique ShueWorld Citizen ID: </label>
+                <input name="id" type="text" id="idInput">
+            </div>
+            <br><br>
+            <div class="row">
+                <label for="candidateSelector">Select Candidate</label>
+                <select name="candidate" id="candidateSelector"></select>
+            </div>
+
+            <input type="submit" name="Submit">
         </form>
+
+        <script>
+            function sendVote(e) {
+                e.preventDefault();
+                fetch("http://localhost:5000/vote", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Expose-Headers': ['Authorization', 'Origin', 'Content-Type', 'Content-Length', 'Accept'],
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    body: JSON.stringify({
+                        id: document.getElementById('idInput').value,
+                        candidate: document.getElementById('candidateSelector').value
+                    })
+                })
+                .then((res) => {
+                    res.text().then(text => alert(text))
+                })
+            }
+
+            document.body.onload = function() {
+
+                fetch("http://localhost:5000/candidates")
+                .then((res) => {
+                    res.json()
+                    .then(data => {
+                        const select = document.getElementById('candidateSelector')
+                        for(let i = 0; i < data.length; i++) {
+                            var option = document.createElement('option')
+                            option.innerHTML = data[i]
+                            option.value = data[i]
+                            select.appendChild(option)
+                        }
+                    })
+                })
+                .catch(e => console.log(e))
+            }
+
+        </script>
     </body>
 </html>
