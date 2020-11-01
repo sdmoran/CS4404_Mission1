@@ -4,6 +4,7 @@ const fs = require('fs')
 const numTestUsers = 100
 const sequelize = new Sequelize('sqlite::memory:')
 const candidates = ["Reebok Obama", "Mittens Rhombus", "Vermin Supreme", "Sheev Palpatine", "John McCain"]
+const secret = process.env.DATA_SECRET || "default_secret"
 
 
 class User extends Model {}
@@ -62,7 +63,7 @@ app.use(bodyParser.json())
 const port = 5000
 
 const corsOptions = {
-    origin: '*',
+    origin: 'localhost:3000',
     optionsSuccessStatus: 200
 }
 
@@ -93,6 +94,13 @@ app.post('/vote', corsMiddleware(corsOptions), (req, res) => {
     const id = req.param('id')
     var candidate = req.param('candidate')
 
+    // If the request doesn't have proper server secret, reject it
+    if(req.param('secret') != secret) {
+        res.status(403).send("Vote failed")
+        return
+    }
+
+
     console.log(`ID: ${id}, Candidate: ${candidate}`)
 
     if(!candidate || !id) {
@@ -114,7 +122,7 @@ app.post('/vote', corsMiddleware(corsOptions), (req, res) => {
             })
         }
         else {
-            res.status(404).send(`Couldn't find record for voter id: ${id}`)
+            res.status(403).send("Vote failed")
         }
     })
 })

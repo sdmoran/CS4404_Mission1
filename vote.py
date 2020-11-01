@@ -1,6 +1,6 @@
 import requests, random, json
 
-url = "http://localhost:5000"
+url = "http://localhost:3000"
 
 candidates = requests.get(url + '/candidates').json()
 
